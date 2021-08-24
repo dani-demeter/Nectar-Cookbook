@@ -5,51 +5,40 @@ import 'main.dart';
 class ListElement extends StatefulWidget {
   void Function(String) addNewTagCallback;
   void Function(int) removeTagCallback;
+  void Function(int, String) setTagCallback;
   int idx = 0;
   String value;
-  ListElement(
-      this.value, this.idx, this.addNewTagCallback, this.removeTagCallback) {
-    print("creating element " +
-        this.value.toString() +
-        " " +
-        this.idx.toString());
+  var txt;
+  bool finalized = false;
+  FocusNode fn;
+  ListElement(this.value, this.idx, this.addNewTagCallback,
+      this.removeTagCallback, this.setTagCallback, this.fn) {
+    txt = TextEditingController(text: value);
+    finalized = value != "";
   }
 
   @override
-  State<StatefulWidget> createState() =>
-      _ListElementState(value, idx, addNewTagCallback, removeTagCallback);
+  State<ListElement> createState() => _ListElementState();
 }
 
 class _ListElementState extends State<ListElement> {
-  void Function(String) addNewTagCallback;
-  void Function(int) removeTagCallback;
-  int idx = 0;
-  var txt = TextEditingController();
-  bool finalized = false;
-  String tagValue = "";
-
-  _ListElementState(
-      this.tagValue, this.idx, this.addNewTagCallback, this.removeTagCallback) {
-    txt.text = this.tagValue;
-    if (tagValue != "") {
-      finalized = true;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    print("list element being built: " + idx.toString() + " " + tagValue);
     return Row(
       children: [
         Flexible(
           child: TextField(
-            onSubmitted: addTag,
-            onChanged: (value) {
+            focusNode: widget.fn,
+            onSubmitted: (newVal) {
+              addTag(newVal, context);
+            },
+            onEditingComplete: () {},
+            onChanged: (newVal) {
               setState(() {
-                tagValue = value;
+                widget.value = newVal;
               });
             },
-            controller: txt,
+            controller: widget.txt,
             maxLines: 1,
             decoration: InputDecoration(
               isDense: true,
@@ -75,31 +64,58 @@ class _ListElementState extends State<ListElement> {
         ),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: appConfig['blockSize'] * 2),
-          child: finalized
+          child: widget.finalized
               ? IconButton(
                   icon: Icon(Icons.remove_circle_outline),
-                  onPressed: () => removeTagCallback(idx))
+                  onPressed: removeTag,
+                )
               : IconButton(
                   icon: Icon(
                     Icons.add_circle_outline,
-                    color: tagValue.length > 0 ? gray : gray.withAlpha(100),
+                    color: widget.value.length > 0 ? gray : gray.withAlpha(100),
                   ),
-                  onPressed: () => addTag(tagValue),
+                  onPressed: () {
+                    addTag(widget.value, context);
+                  },
                 ),
         )
       ],
     );
   }
 
-  void addTag(String addedTag) {
+  void addTag(String addedTag, BuildContext context) {
     setState(() {
-      if (!finalized) {
-        print("added tag");
+      if (!widget.finalized) {
         if (addedTag.length != 0) {
-          finalized = true;
-          addNewTagCallback(addedTag);
+          widget.finalized = true;
+          widget.addNewTagCallback(addedTag);
+        } else {
+          print("unfocusing");
+          unfocusElement(context);
+        }
+      } else {
+        if (addedTag.length == 0) {
+          removeTag();
+        } else {
+          unfocusElement(context);
+          widget.setTagCallback(widget.idx, addedTag);
         }
       }
     });
+  }
+
+  void removeTag() {
+    unfocusElement(context);
+    widget.removeTagCallback(widget.idx);
+  }
+
+  void unfocusElement(BuildContext context) {
+    widget.fn.unfocus();
+    FocusScope.of(context).unfocus();
+    FocusScopeNode currentFocus = FocusScope.of(context);
+
+    if (!currentFocus.hasPrimaryFocus) {
+      currentFocus.unfocus();
+    }
   }
 }

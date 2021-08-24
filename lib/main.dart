@@ -1,8 +1,10 @@
+import 'package:cookbook/Pages/FindRecipePage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'backButton.dart';
-import 'parameterDropdown.dart';
-import 'listMaker.dart';
+import 'Pages/HomePage.dart';
+import 'Pages/AddRecipePage.dart';
+import 'Pages/FindRecipePage.dart';
+import 'Pages/RecipePage.dart';
 
 var appConfig = new Map();
 var dropShadow;
@@ -20,7 +22,6 @@ const mint = Color(0xFF24FBCA);
 const inputColor = Color(0xFF202F44);
 
 final countryNames = [
-  "Unknown",
   "Afghanistan",
   "Albania",
   "Algeria",
@@ -267,8 +268,28 @@ class AppContainer extends StatefulWidget {
 }
 
 class _AppContainerState extends State<AppContainer> {
-  String _page = "addRecipe";
-  var name2page = {'home': new HomePage(), 'addRecipe': new AddRecipePage()};
+  String _page = "recipe";
+  var name2page = {
+    'home': new HomePage(),
+    'addRecipe': new AddRecipePage(),
+    'findRecipe': new FindRecipePage(),
+    'recipe': new RecipePage(
+        () => print("hi"),
+        "Kasespatzle",
+        4,
+        true,
+        "Easy",
+        30,
+        "Entree",
+        "Austria",
+        <String>["Heavy", "Mate", "Konyi"],
+        <String>[
+          "20 tons of cheese",
+          "12 pieces of spatzle",
+          "one liter of ketchup"
+        ],
+        "Put the cheese all together. Cook the cheese. Bake the cheese. Eat the cheese. Repeat."),
+  };
   @override
   Widget build(BuildContext context) {
     setScreenSizeDependencies(context);
@@ -294,236 +315,4 @@ void setScreenSizeDependencies(BuildContext context) {
       spreadRadius: appConfig['blockSize'] / 4);
 
   borderRadius = appConfig['blockSize'] * 3;
-}
-
-class HomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-        padding: EdgeInsets.symmetric(horizontal: appConfig['blockSize'] * 10),
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Text("Welcome!",
-              style:
-                  titleStyle.copyWith(fontSize: appConfig['blockSize'] * 10)),
-          SizedBox(height: appConfig['blockSizeVertical'] * 5),
-          InkWell(
-              onTap: () => print("Container pressed"),
-              borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
-              child: Container(
-                height: appConfig['blockSizeVertical'] * 20,
-                decoration: BoxDecoration(
-                    borderRadius:
-                        BorderRadius.all(Radius.circular(borderRadius)),
-                    color: const Color(0xFF33A7FF),
-                    boxShadow: [dropShadow]),
-              )),
-          SizedBox(height: appConfig['blockSizeVertical'] * 5),
-          InkWell(
-              onTap: () => print("Container pressed"),
-              borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
-              child: Container(
-                height: appConfig['blockSizeVertical'] * 20,
-                decoration: BoxDecoration(
-                    borderRadius:
-                        BorderRadius.all(Radius.circular(borderRadius)),
-                    color: const Color(0xFF33A7FF),
-                    boxShadow: [dropShadow]),
-              )),
-          SizedBox(height: appConfig['blockSizeVertical'] * 5),
-          InkWell(
-              onTap: () => print("Container pressed"),
-              borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
-              child: Container(
-                height: appConfig['blockSizeVertical'] * 10,
-                decoration: BoxDecoration(
-                    borderRadius:
-                        BorderRadius.all(Radius.circular(borderRadius)),
-                    color: const Color(0xFF33A7FF),
-                    boxShadow: [dropShadow]),
-              )),
-        ]));
-  }
-}
-
-class AddRecipePage extends StatefulWidget {
-  const AddRecipePage({Key key}) : super(key: key);
-
-  @override
-  _AddRecipePageState createState() => _AddRecipePageState();
-}
-
-class _AddRecipePageState extends State<AddRecipePage> {
-  var _tags = <String>["Heavy", "Mate", "Konyi"];
-
-  @override
-  Widget build(BuildContext context) {
-    if (_tags[_tags.length - 1] != "") _tags.add("");
-    print("rendering");
-    print(_tags);
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          //title
-          Row(mainAxisSize: MainAxisSize.max, children: [
-            new IconBackButton(() => print('back button pressed')),
-            Expanded(
-                child: Text(
-              "New Recipe",
-              textAlign: TextAlign.center,
-              style: titleStyle,
-            )),
-            new IconBackButton(() => print('save button pressed'))
-          ]),
-          SizedBox(
-            height: appConfig['blockSizeVertical'] * 5,
-          ),
-          //recipe name
-          Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: appConfig['blockSize'] * 10),
-              child: TextField(
-                decoration: InputDecoration(
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: mint, width: 1.0),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(borderRadius),
-                      topRight: Radius.circular(borderRadius),
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(borderRadius),
-                      topRight: Radius.circular(borderRadius),
-                    ),
-                  ),
-                  filled: true,
-                  fillColor: fullwhite,
-                  labelText: "Recipe Name",
-                  labelStyle: TextStyle(color: gray),
-                ),
-                style:
-                    GoogleFonts.alata(textStyle: TextStyle(color: inputColor)),
-              )),
-          SizedBox(
-            height: appConfig['blockSizeVertical'] * 5,
-          ),
-          //time to make
-          Padding(
-            padding:
-                EdgeInsets.symmetric(horizontal: appConfig['blockSize'] * 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Time to Make", style: parameterStyle),
-                new ParameterInput(() => print("callback")),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: appConfig['blockSizeVertical'] * 2,
-          ),
-          //difficulty
-          Padding(
-            padding:
-                EdgeInsets.symmetric(horizontal: appConfig['blockSize'] * 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Difficulty", style: parameterStyle),
-                new ParameterDropdown(
-                    "Easy",
-                    <String>['Easy', 'Medium', 'Hard'],
-                    () => print("callback")),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: appConfig['blockSizeVertical'] * 2,
-          ),
-          //type of dish
-          Padding(
-            padding:
-                EdgeInsets.symmetric(horizontal: appConfig['blockSize'] * 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Type of Dish", style: parameterStyle),
-                new ParameterDropdown(
-                    "Entree",
-                    <String>['Appetizer', 'Entree', 'Dessert', 'Drink'],
-                    () => print("callback")),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: appConfig['blockSizeVertical'] * 2,
-          ),
-          //country
-          Padding(
-            padding:
-                EdgeInsets.symmetric(horizontal: appConfig['blockSize'] * 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Country of Origin", style: parameterStyle),
-                new ParameterDropdown(
-                    "Unknown", countryNames, () => print("callback")),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: appConfig['blockSizeVertical'] * 5,
-          ),
-          //tags
-          Padding(
-            padding:
-                EdgeInsets.symmetric(horizontal: appConfig['blockSize'] * 10),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Tags",
-                style: listNameStyle,
-              ),
-            ),
-          ),
-        ]
-          ..addAll(_tags
-              .asMap()
-              .entries
-              .map((e) => Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: appConfig['blockSize'] * 10,
-                      vertical: appConfig['blockSizeVertical']),
-                  child: ListElement(e.value, e.key, addNewTag, removeTag)))
-              .toList())
-          ..addAll([
-            Container(height: 50, color: mint),
-            Container(height: 50, color: fullwhite),
-            Container(height: 50, color: mint),
-            Container(height: 50, color: fullwhite),
-            Container(height: 50, color: mint),
-            Container(height: 50, color: fullwhite),
-            Container(height: 50, color: mint),
-          ]),
-      ),
-    );
-  }
-
-  void addNewTag(String newTag) {
-    setState(() {
-      _tags[_tags.length - 1] = newTag;
-      _tags.add("");
-      print(_tags);
-    });
-  }
-
-  void removeTag(int idx) {
-    setState(() {
-      print(_tags);
-      print("removing at" + idx.toString());
-      _tags.removeAt(idx);
-      print(_tags);
-    });
-  }
 }
