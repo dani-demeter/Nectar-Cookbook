@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cookbook/Pages/FindRecipePage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -5,6 +7,8 @@ import 'Pages/HomePage.dart';
 import 'Pages/AddRecipePage.dart';
 import 'Pages/FindRecipePage.dart';
 import 'Pages/RecipePage.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 var appConfig = new Map();
 var dropShadow;
@@ -263,37 +267,52 @@ class MyApp extends StatelessWidget {
 
 class AppContainer extends StatefulWidget {
   const AppContainer({Key key}) : super(key: key);
+
   @override
   _AppContainerState createState() => _AppContainerState();
 }
 
 class _AppContainerState extends State<AppContainer> {
-  String _page = "recipe";
-  var name2page = {
-    'home': new HomePage(),
-    'addRecipe': new AddRecipePage(),
-    'findRecipe': new FindRecipePage(),
-    'recipe': new RecipePage(
-        () => print("hi"),
-        "Kasespatzle",
-        4,
-        true,
-        "Easy",
-        30,
-        "Entree",
-        "Austria",
-        <String>["Heavy", "Mate", "Konyi"],
-        <String>[
-          "20 tons of cheese",
-          "12 pieces of spatzle",
-          "one liter of ketchup"
-        ],
-        "Put the cheese all together. Cook the cheese. Bake the cheese. Eat the cheese. Repeat."),
-  };
+  String _page = "home";
+  var name2page;
+
+  _AppContainerState() {
+    name2page = {
+      'home': HomePage(setPage),
+      'addRecipe': AddRecipePage(setPage),
+      'findRecipe': FindRecipePage(setPage),
+      'recipe': RecipePage(
+        setPage,
+        new Recipe(
+            "Kasespatzle",
+            4,
+            true,
+            "Easy",
+            30,
+            "Entree",
+            "Austria",
+            <String>["Heavy", "Mate", "Konyi"],
+            <String>[
+              "20 tons of cheese",
+              "12 pieces of spatzle",
+              "one liter of ketchup",
+              "a really long ingredient that i don't think will fit in one line, but maybe will?"
+            ],
+            "Put the cheese all together. Cook the cheese. Bake the cheese. Eat the cheese. Repeat."),
+      ),
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     setScreenSizeDependencies(context);
     return name2page[_page];
+  }
+
+  void setPage(String newPage, var options) {
+    setState(() {
+      _page = newPage;
+    });
   }
 }
 
@@ -315,4 +334,75 @@ void setScreenSizeDependencies(BuildContext context) {
       spreadRadius: appConfig['blockSize'] / 4);
 
   borderRadius = appConfig['blockSize'] * 3;
+}
+
+class Recipe {
+  final String title;
+  final int stars;
+  final bool favorited;
+  final String difficulty;
+  final int time2make;
+  final String typeOfDish;
+  final String countryOfOrigin;
+
+  final List<String> tags;
+  final List<String> ingredients;
+  final String prep;
+  Recipe(
+      this.title,
+      this.stars,
+      this.favorited,
+      this.difficulty,
+      this.time2make,
+      this.typeOfDish,
+      this.countryOfOrigin,
+      this.tags,
+      this.ingredients,
+      this.prep);
+
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'stars': stars,
+        'favorited': favorited,
+        'difficulty': difficulty,
+        'time2make': time2make,
+        'typeOfDish': typeOfDish,
+        'countryOfOrigin': countryOfOrigin,
+        'tags': tags,
+        'ingredients': ingredients,
+        'prep': prep,
+      };
+}
+
+Future<String> get _localPath async {
+  final directory = await getApplicationDocumentsDirectory();
+
+  return directory.path;
+}
+
+Future<File> get _localFile async {
+  final path = await _localPath;
+  return File('$path/recipes.json');
+}
+
+Future<File> writeRecipes(List<Recipe> recipes) async {
+  final file = await _localFile;
+
+  String toWrite = jsonEncode({"recipes": recipes});
+
+  print("wrote: " + toWrite);
+  return file.writeAsString(toWrite);
+}
+
+Future<Map<String, dynamic>> readRecipes() async {
+  try {
+    final file = await _localFile;
+
+    final contents = await file.readAsString();
+    Map<String, dynamic> readObject = jsonDecode(contents);
+    return readObject;
+  } catch (e) {
+    print(e);
+    return null;
+  }
 }

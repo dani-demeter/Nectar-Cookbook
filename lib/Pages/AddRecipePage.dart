@@ -7,7 +7,9 @@ import '../listMaker.dart';
 import '../bigButton.dart';
 
 class AddRecipePage extends StatefulWidget {
-  AddRecipePage({Key key}) : super(key: key);
+  void Function(String, dynamic) setPageCallback;
+
+  AddRecipePage(this.setPageCallback);
 
   bool focusLastTag = false;
   var tagFocusNodes = <FocusNode>[];
@@ -39,7 +41,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
         children: [
           //title
           Row(mainAxisSize: MainAxisSize.max, children: [
-            new IconBackButton(() => print('back button pressed')),
+            new IconBackButton(() => widget.setPageCallback("home", null)),
             Expanded(
                 child: Text(
               "New Recipe",
@@ -260,7 +262,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
             SizedBox(
               height: appConfig['blockSizeVertical'] * 5,
             ),
-            BigButton(() => print("Add Recipe"), "Add Recipe"),
+            BigButton(
+                () => widget.setPageCallback("recipe", null), "Add Recipe"),
             SizedBox(
               height: appConfig['blockSizeVertical'] * 5,
             )
