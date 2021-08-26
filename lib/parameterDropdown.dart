@@ -3,11 +3,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'main.dart';
 
 class ParameterDropdown extends StatefulWidget {
-  VoidCallback callback;
+  void Function(String) onChangedCallback;
   String defaultValue;
   List<String> items;
 
-  ParameterDropdown(this.defaultValue, this.items, this.callback);
+  ParameterDropdown(this.defaultValue, this.items, this.onChangedCallback);
 
   @override
   State<StatefulWidget> createState() =>
@@ -54,6 +54,7 @@ class _ParameterDropdownState extends State<ParameterDropdown> {
             }).toList(),
             onChanged: (String newValue) {
               setState(() {
+                widget.onChangedCallback(newValue);
                 _value = newValue;
               });
             }));
@@ -61,9 +62,9 @@ class _ParameterDropdownState extends State<ParameterDropdown> {
 }
 
 class ParameterInput extends StatefulWidget {
-  VoidCallback callback;
+  TextEditingController txt;
 
-  ParameterInput(this.callback);
+  ParameterInput(this.txt);
 
   @override
   State<StatefulWidget> createState() => _ParameterInputState();
@@ -73,7 +74,7 @@ class _ParameterInputState extends State<ParameterInput> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        width: appConfig['blockSize'] * 25,
+        width: appConfig['blockSize'] * 35,
         decoration: BoxDecoration(
             color: fullwhite,
             borderRadius: BorderRadius.all(Radius.circular(borderRadius))),
@@ -105,6 +106,7 @@ class _ParameterInputState extends State<ParameterInput> {
             fillColor: fullwhite,
           ),
           style: parameterValueStyle,
+          controller: widget.txt,
         ));
   }
 }

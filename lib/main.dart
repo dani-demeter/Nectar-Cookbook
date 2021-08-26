@@ -7,6 +7,7 @@ import 'Pages/HomePage.dart';
 import 'Pages/AddRecipePage.dart';
 import 'Pages/FindRecipePage.dart';
 import 'Pages/RecipePage.dart';
+import 'Pages/RecipesListPage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
@@ -242,6 +243,8 @@ var parameterValueStyle =
 var listNameStyle =
     GoogleFonts.alata(textStyle: TextStyle(color: gray, fontSize: 12));
 
+Map<String, Recipe> recipeBook = {};
+
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -279,10 +282,11 @@ class _AppContainerState extends State<AppContainer> {
   _AppContainerState() {
     name2page = {
       'home': HomePage(setPage),
-      'addRecipe': AddRecipePage(setPage),
-      'findRecipe': FindRecipePage(setPage),
+      'addRecipe': AddRecipePage(setPage, () => setPage("home", null, null)),
+      'findRecipe': FindRecipePage(setPage, () => setPage("home", null, null)),
       'recipe': RecipePage(
         setPage,
+        () {},
         new Recipe(
             "Kasespatzle",
             4,
@@ -300,6 +304,8 @@ class _AppContainerState extends State<AppContainer> {
             ],
             "Put the cheese all together. Cook the cheese. Bake the cheese. Eat the cheese. Repeat."),
       ),
+      'recipesList':
+          RecipesListPage(setPage, () => setPage("home", null, null), []),
     };
   }
 
@@ -309,7 +315,30 @@ class _AppContainerState extends State<AppContainer> {
     return name2page[_page];
   }
 
-  void setPage(String newPage, var options) {
+  void setPage(String newPage, var options, VoidCallback backCallback) {
+    switch (newPage) {
+      case "addRecipe":
+        if (options) {
+          name2page['addRecipe'].clearValues();
+        }
+        break;
+      case "findRecipe":
+        if (options) {
+          name2page['findRecipe'].clearValues();
+        }
+        break;
+      case "recipe":
+        assert(options is Recipe);
+        assert(backCallback != null);
+        name2page['recipe'] = RecipePage(setPage, backCallback, options);
+        break;
+      case "recipesList":
+        name2page['recipesList'] =
+            RecipesListPage(setPage, backCallback, options);
+        break;
+      default:
+        break;
+    }
     setState(() {
       _page = newPage;
     });
@@ -337,17 +366,17 @@ void setScreenSizeDependencies(BuildContext context) {
 }
 
 class Recipe {
-  final String title;
-  final int stars;
-  final bool favorited;
-  final String difficulty;
-  final int time2make;
-  final String typeOfDish;
-  final String countryOfOrigin;
+  String title;
+  int stars;
+  bool favorited;
+  String difficulty;
+  int time2make;
+  String typeOfDish;
+  String countryOfOrigin;
 
-  final List<String> tags;
-  final List<String> ingredients;
-  final String prep;
+  List<String> tags;
+  List<String> ingredients;
+  String prep;
   Recipe(
       this.title,
       this.stars,
@@ -385,10 +414,10 @@ Future<File> get _localFile async {
   return File('$path/recipes.json');
 }
 
-Future<File> writeRecipes(List<Recipe> recipes) async {
+Future<File> writeRecipes(Map<String, Recipe> recipes) async {
   final file = await _localFile;
 
-  String toWrite = jsonEncode({"recipes": recipes});
+  String toWrite = jsonEncode(recipes);
 
   print("wrote: " + toWrite);
   return file.writeAsString(toWrite);

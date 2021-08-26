@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
 import '../backButton.dart';
 import '../parameterDropdown.dart';
@@ -7,9 +6,10 @@ import '../listMaker.dart';
 import '../bigButton.dart';
 
 class FindRecipePage extends StatefulWidget {
-  void Function(String, dynamic) setPageCallback;
+  void Function(String, dynamic, VoidCallback) setPageCallback;
+  VoidCallback backCallback;
 
-  FindRecipePage(this.setPageCallback);
+  FindRecipePage(this.setPageCallback, this.backCallback);
 
   bool focusLastTag = false;
   var tagFocusNodes = <FocusNode>[];
@@ -17,7 +17,31 @@ class FindRecipePage extends StatefulWidget {
   bool focusLastIngredient = false;
   var ingredientFocusNodes = <FocusNode>[];
 
-  var tags = <String>["Heavy", "Mate", "Konyi"];
+  var tags = <String>[];
+
+  var keywordsController = TextEditingController();
+  var time2makeTextController = TextEditingController();
+
+  String difficulty = "Any";
+  String typeOfDish = "Any";
+  String countryOfOrigin = "Any";
+
+  void clearValues() {
+    focusLastTag = false;
+    tagFocusNodes.clear();
+
+    focusLastIngredient = false;
+    ingredientFocusNodes.clear();
+
+    tags = <String>[];
+
+    keywordsController.text = "";
+    time2makeTextController.text = "";
+
+    difficulty = "Any";
+    typeOfDish = "Any";
+    countryOfOrigin = "Any";
+  }
 
   @override
   _FindRecipePageState createState() => _FindRecipePageState();
@@ -26,7 +50,8 @@ class FindRecipePage extends StatefulWidget {
 class _FindRecipePageState extends State<FindRecipePage> {
   @override
   Widget build(BuildContext context) {
-    if (widget.tags[widget.tags.length - 1] != "") widget.tags.add("");
+    if (widget.tags.length == 0 || widget.tags[widget.tags.length - 1] != "")
+      widget.tags.add("");
     while (widget.tagFocusNodes.length < widget.tags.length) {
       widget.tagFocusNodes.add(FocusNode());
     }
@@ -35,7 +60,8 @@ class _FindRecipePageState extends State<FindRecipePage> {
         children: [
           //title
           Row(mainAxisSize: MainAxisSize.max, children: [
-            new IconBackButton(() => widget.setPageCallback("home", null)),
+            new IconBackButton(
+                () => widget.setPageCallback("home", null, null)),
             Expanded(
                 child: Text(
               "Find Recipe",
@@ -57,7 +83,7 @@ class _FindRecipePageState extends State<FindRecipePage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text("Max Time to Make", style: parameterStyle),
-                new ParameterInput(() => print("callback")),
+                new ParameterInput(widget.time2makeTextController),
               ],
             ),
           ),
@@ -72,10 +98,10 @@ class _FindRecipePageState extends State<FindRecipePage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text("Difficulty", style: parameterStyle),
-                new ParameterDropdown(
-                    "Any",
-                    <String>['Any', 'Easy', 'Medium', 'Hard'],
-                    () => print("callback")),
+                new ParameterDropdown(widget.difficulty,
+                    <String>['Any', 'Easy', 'Medium', 'Hard'], (newDifficulty) {
+                  widget.difficulty = newDifficulty;
+                }),
               ],
             ),
           ),
@@ -90,10 +116,15 @@ class _FindRecipePageState extends State<FindRecipePage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text("Type of Dish", style: parameterStyle),
-                new ParameterDropdown(
-                    "Any",
-                    <String>['Any', 'Appetizer', 'Entree', 'Dessert', 'Drink'],
-                    () => print("callback")),
+                new ParameterDropdown(widget.typeOfDish, <String>[
+                  'Any',
+                  'Appetizer',
+                  'Entree',
+                  'Dessert',
+                  'Drink'
+                ], (newTypeOfDish) {
+                  widget.typeOfDish = newTypeOfDish;
+                }),
               ],
             ),
           ),
@@ -108,8 +139,11 @@ class _FindRecipePageState extends State<FindRecipePage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text("Country of Origin", style: parameterStyle),
-                new ParameterDropdown("Any", ["Any"]..addAll(countryNames),
-                    () => print("callback")),
+                new ParameterDropdown(
+                    widget.countryOfOrigin, ["Any"] + countryNames,
+                    (newCountryOfOrigin) {
+                  widget.countryOfOrigin = newCountryOfOrigin;
+                }),
               ],
             ),
           ),
@@ -187,7 +221,23 @@ class _FindRecipePageState extends State<FindRecipePage> {
               height: appConfig['blockSizeVertical'] * 5,
             ),
             BigButton(
-                () => widget.setPageCallback("recipe", null), "Find Recipe"),
+                () => widget.setPageCallback(
+                    "recipesList",
+                    {
+                      'maxTime2Make': widget.time2makeTextController.text == ""
+                          ? 0
+                          : int.parse(widget.time2makeTextController.text),
+                      'difficulty': widget.difficulty,
+                      'typeOfDish': widget.typeOfDish,
+                      'countryOfOrigin': widget.countryOfOrigin,
+                      'tags': widget.tags.length != 0
+                          ? widget.tags.sublist(0, widget.tags.length - 1)
+                          : [],
+                      'keywords': widget.keywordsController.text
+                    },
+                    () => widget.setPageCallback(
+                        "findRecipe", false, widget.backCallback)),
+                "Find Recipe"),
             SizedBox(
               height: appConfig['blockSizeVertical'] * 5,
             )

@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
 import '../Components/Tag.dart';
 import '../backButton.dart';
 import '../Components/Ratings.dart';
 
 class RecipePage extends StatelessWidget {
-  void Function(String, dynamic) setPageCallback;
+  void Function(String, dynamic, VoidCallback) setPageCallback;
+  VoidCallback backCallback;
   Recipe recipe;
 
   RecipePage(
     this.setPageCallback,
+    this.backCallback,
     this.recipe,
   );
 
@@ -44,7 +45,7 @@ class RecipePage extends StatelessWidget {
                   children: [
                     Row(children: [
                       SizedBox(width: appConfig['blockSize'] * 2),
-                      IconBackButton(() => print("back")),
+                      IconBackButton(backCallback),
                       Expanded(child: Container()),
                       Container(
                         width: appConfig['blockSize'] * 10,
@@ -63,10 +64,10 @@ class RecipePage extends StatelessWidget {
                       child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Ratings(
-                                (newRating) =>
-                                    print("rated " + newRating.toString()),
-                                recipe.stars),
+                            Ratings((newRating) {
+                              recipeBook[recipe.title].stars = newRating;
+                              writeRecipes(recipeBook);
+                            }, recipe.stars),
                             Icon(Icons.favorite_border_rounded, color: mint)
                           ]),
                     )
@@ -146,6 +147,7 @@ class RecipePage extends StatelessWidget {
             padding:
                 EdgeInsets.symmetric(horizontal: appConfig['blockSize'] * 10),
             child: Container(
+                width: appConfig['blockSize'] * 80,
                 decoration: BoxDecoration(
                   color: fullwhite,
                   borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
@@ -172,6 +174,7 @@ class RecipePage extends StatelessWidget {
             padding:
                 EdgeInsets.symmetric(horizontal: appConfig['blockSize'] * 10),
             child: Container(
+                width: appConfig['blockSize'] * 80,
                 decoration: BoxDecoration(
                   color: fullwhite,
                   borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
