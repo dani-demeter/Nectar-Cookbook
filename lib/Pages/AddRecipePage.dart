@@ -69,8 +69,12 @@ class _AddRecipePageState extends State<AddRecipePage> {
     var res = SingleChildScrollView(
       child: Column(
         children: [
+          SizedBox(
+            height: appConfig['blockSizeVertical'],
+          ),
           //title
           Row(mainAxisSize: MainAxisSize.max, children: [
+            SizedBox(width: appConfig['blockSize'] * 2),
             new IconBackButton(
                 () => widget.setPageCallback("home", null, null)),
             Expanded(
@@ -81,7 +85,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
             )),
             SizedBox(
                 width: appConfig['blockSizeVertical'] * 7,
-                height: appConfig['blockSizeVertical'] * 7)
+                height: appConfig['blockSizeVertical'] * 7),
+            SizedBox(width: appConfig['blockSize'] * 2),
           ]),
           SizedBox(
             height: appConfig['blockSizeVertical'] * 5,

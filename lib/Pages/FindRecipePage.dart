@@ -58,8 +58,12 @@ class _FindRecipePageState extends State<FindRecipePage> {
     var res = SingleChildScrollView(
       child: Column(
         children: [
+          SizedBox(
+            height: appConfig['blockSizeVertical'],
+          ),
           //title
           Row(mainAxisSize: MainAxisSize.max, children: [
+            SizedBox(width: appConfig['blockSize'] * 2),
             new IconBackButton(
                 () => widget.setPageCallback("home", null, null)),
             Expanded(
@@ -70,7 +74,8 @@ class _FindRecipePageState extends State<FindRecipePage> {
             )),
             SizedBox(
                 width: appConfig['blockSizeVertical'] * 7,
-                height: appConfig['blockSizeVertical'] * 7)
+                height: appConfig['blockSizeVertical'] * 7),
+            SizedBox(width: appConfig['blockSize'] * 2),
           ]),
           SizedBox(
             height: appConfig['blockSizeVertical'] * 5,
@@ -193,6 +198,7 @@ class _FindRecipePageState extends State<FindRecipePage> {
               padding:
                   EdgeInsets.symmetric(horizontal: appConfig['blockSize'] * 10),
               child: TextField(
+                controller: widget.keywordsController,
                 onSubmitted: (val) => print("submitted!"),
                 decoration: InputDecoration(
                   isDense: true,
@@ -224,16 +230,20 @@ class _FindRecipePageState extends State<FindRecipePage> {
                 () => widget.setPageCallback(
                     "recipesList",
                     {
-                      'maxTime2Make': widget.time2makeTextController.text == ""
-                          ? 0
-                          : int.parse(widget.time2makeTextController.text),
-                      'difficulty': widget.difficulty,
-                      'typeOfDish': widget.typeOfDish,
-                      'countryOfOrigin': widget.countryOfOrigin,
-                      'tags': widget.tags.length != 0
-                          ? widget.tags.sublist(0, widget.tags.length - 1)
-                          : [],
-                      'keywords': widget.keywordsController.text
+                      'criteria': {
+                        'maxTime2Make': widget.time2makeTextController.text ==
+                                ""
+                            ? 0
+                            : int.parse(widget.time2makeTextController.text),
+                        'difficulty': widget.difficulty,
+                        'typeOfDish': widget.typeOfDish,
+                        'countryOfOrigin': widget.countryOfOrigin,
+                        'tags': widget.tags.length != 0
+                            ? widget.tags.sublist(0, widget.tags.length - 1)
+                            : [],
+                        'keywords': widget.keywordsController.text.split(" ")
+                      },
+                      'title': 'Recipes'
                     },
                     () => widget.setPageCallback(
                         "findRecipe", false, widget.backCallback)),

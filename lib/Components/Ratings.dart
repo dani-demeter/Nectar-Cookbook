@@ -42,11 +42,35 @@ class _RatingsState extends State<Ratings> {
       onPressed: (int index) {
         setState(() {
           widget.rating = index + 1;
+          widget.setNewRatingCallback(index + 1);
           for (var i = 0; i < 5; i++) {
             widget.isSelected[i] = i < widget.rating;
           }
         });
       },
     );
+  }
+}
+
+class Favorited extends StatefulWidget {
+  void Function(bool) setFavoriteCallback;
+  bool isFavorite;
+  Favorited(this.setFavoriteCallback, this.isFavorite) {}
+
+  @override
+  State<Favorited> createState() => _FavoritedState();
+}
+
+class _FavoritedState extends State<Favorited> {
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+        icon: Icon(
+            widget.isFavorite ? Icons.favorite : Icons.favorite_border_rounded,
+            color: mint),
+        onPressed: () => setState(() {
+              widget.isFavorite = !widget.isFavorite;
+              widget.setFavoriteCallback(widget.isFavorite);
+            }));
   }
 }

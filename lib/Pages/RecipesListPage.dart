@@ -5,21 +5,32 @@ import '../Components/RecipePreview.dart';
 
 class RecipesListPage extends StatelessWidget {
   void Function(String, dynamic, VoidCallback) setPageCallback;
+  String pageTitle;
   VoidCallback backCallback;
-  List<Recipe> recipes;
+  Map<String, dynamic> criteria;
 
-  RecipesListPage(this.setPageCallback, this.backCallback, this.recipes);
+  RecipesListPage(
+      this.setPageCallback, this.backCallback, this.criteria, this.pageTitle);
 
   @override
   Widget build(BuildContext context) {
+    List<Recipe> recipes = findRecipesWithCriteria(criteria);
     return Column(
         children: <Widget>[
+              SizedBox(
+                height: appConfig['blockSizeVertical'],
+              ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.max,
                 children: [
+                  SizedBox(width: appConfig['blockSize'] * 2),
                   IconBackButton(backCallback),
-                  Text("Favorites", style: titleStyle),
-                  SizedBox(width: appConfig['blockSizeVertical'] * 7)
+                  Expanded(
+                    child: Text(pageTitle,
+                        textAlign: TextAlign.center, style: titleStyle),
+                  ),
+                  SizedBox(width: appConfig['blockSizeVertical'] * 7),
+                  SizedBox(width: appConfig['blockSize'] * 2),
                 ],
               )
             ] +
@@ -28,7 +39,10 @@ class RecipesListPage extends StatelessWidget {
                 .entries
                 .map((e) => RecipePreview(
                     setPageCallback,
-                    () => setPageCallback("recipesList", recipes, backCallback),
+                    () => setPageCallback(
+                        "recipesList",
+                        {'criteria': criteria, 'title': pageTitle},
+                        backCallback),
                     e.value))
                 .toList());
   }

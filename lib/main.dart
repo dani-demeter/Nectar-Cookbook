@@ -269,7 +269,14 @@ class MyApp extends StatelessWidget {
 }
 
 class AppContainer extends StatefulWidget {
-  const AppContainer({Key key}) : super(key: key);
+  AppContainer() {
+    readRecipes().then((value) {
+      recipeBook = {};
+      value.values.forEach((recipe2add) {
+        recipeBook[recipe2add['title']] = Recipe.fromJson(recipe2add);
+      });
+    });
+  }
 
   @override
   _AppContainerState createState() => _AppContainerState();
@@ -305,7 +312,7 @@ class _AppContainerState extends State<AppContainer> {
             "Put the cheese all together. Cook the cheese. Bake the cheese. Eat the cheese. Repeat."),
       ),
       'recipesList':
-          RecipesListPage(setPage, () => setPage("home", null, null), []),
+          RecipesListPage(setPage, () => setPage("home", null, null), {}, ''),
     };
   }
 
@@ -333,8 +340,8 @@ class _AppContainerState extends State<AppContainer> {
         name2page['recipe'] = RecipePage(setPage, backCallback, options);
         break;
       case "recipesList":
-        name2page['recipesList'] =
-            RecipesListPage(setPage, backCallback, options);
+        name2page['recipesList'] = RecipesListPage(
+            setPage, backCallback, options['criteria'], options['title']);
         break;
       default:
         break;
@@ -401,6 +408,23 @@ class Recipe {
         'ingredients': ingredients,
         'prep': prep,
       };
+
+  factory Recipe.fromJson(Map<String, dynamic> json) {
+    return Recipe(
+      json["title"],
+      json["stars"],
+      json["favorited"],
+      json["difficulty"],
+      json["time2make"],
+      json["typeOfDish"],
+      json["countryOfOrigin"],
+      [...json["tags"]].map((tag) => tag as String).toList(),
+      [...json["ingredients"]]
+          .map((ingredient) => ingredient as String)
+          .toList(),
+      json["prep"],
+    );
+  }
 }
 
 Future<String> get _localPath async {
@@ -434,4 +458,89 @@ Future<Map<String, dynamic>> readRecipes() async {
     print(e);
     return null;
   }
+}
+
+List<Recipe> findRecipesWithCriteria(Map<String, dynamic> criteria) {
+  List<Recipe> results = [];
+  List<Recipe> recipes2filter = recipeBook.values.toList();
+  if (criteria.isEmpty) {
+    return recipes2filter;
+  }
+  for (var i = 0; i < recipes2filter.length; i++) {
+    bool need2addRecipe = true;
+    //favorited
+    if (criteria.containsKey('favorite') && !recipes2filter[i].favorited) {
+      need2addRecipe = false;
+    }
+    //max time to make
+    if (criteria.containsKey('maxTime2Make') &&
+        criteria['maxTime2Make'] != 0 &&
+        recipes2filter[i].time2make != 0 &&
+        criteria['maxTime2Make'] < recipes2filter[i].time2make) {
+      need2addRecipe = false;
+    }
+    //difficulty
+    if (criteria.containsKey('difficulty') &&
+        criteria['difficulty'] != 'Any' &&
+        criteria['difficulty'] != recipes2filter[i].difficulty) {
+      need2addRecipe = false;
+    }
+    //type of dish
+    if (criteria.containsKey('typeOfDish') &&
+        criteria['typeOfDish'] != 'Any' &&
+        criteria['typeOfDish'] != recipes2filter[i].typeOfDish) {
+      need2addRecipe = false;
+    }
+    //country of origin
+    if (criteria.containsKey('countryOfOrigin') &&
+        criteria['countryOfOrigin'] != 'Any' &&
+        recipes2filter[i].countryOfOrigin != 'Unknown' &&
+        criteria['countryOfOrigin'] != recipes2filter[i].countryOfOrigin) {
+      need2addRecipe = false;
+    }
+    //tags
+    if (criteria.containsKey('tags')) {
+      criteria['tags'].forEach((tag) {
+        bool containsThisTag = false;
+        for (int j = 0; j < recipes2filter[i].tags.length; j++) {
+          if (equalsIgnoreCase(recipes2filter[i].tags[j], tag)) {
+            containsThisTag = true;
+            break;
+          }
+        }
+        if (!containsThisTag) {
+          need2addRecipe = false;
+        }
+      });
+    }
+    if (criteria.containsKey('keywords')) {
+      criteria['keywords'].forEach((keyword) {
+        bool ingredientIncludesKeyword = false;
+        for (int j = 0; j < recipes2filter[i].ingredients.length; j++) {
+          if (containsIgnoreCase(recipes2filter[i].ingredients[j], keyword)) {
+            ingredientIncludesKeyword = true;
+            break;
+          }
+        }
+        if (!ingredientIncludesKeyword) {
+          if (!(containsIgnoreCase(recipes2filter[i].title, keyword) ||
+              containsIgnoreCase(recipes2filter[i].prep, keyword))) {
+            need2addRecipe = false;
+          }
+        }
+      });
+    }
+    if (need2addRecipe) {
+      results.add(recipes2filter[i]);
+    }
+  }
+  return results;
+}
+
+bool containsIgnoreCase(String string1, String string2) {
+  return string1.toLowerCase().contains(string2.toLowerCase());
+}
+
+bool equalsIgnoreCase(String string1, String string2) {
+  return string1.toLowerCase() == string2.toLowerCase();
 }

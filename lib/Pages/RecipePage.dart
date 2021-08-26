@@ -32,8 +32,8 @@ class RecipePage extends StatelessWidget {
             Container(
               height: appConfig['blockSizeVertical'] * 25,
               width: appConfig['blockSize'] * 100,
-              child: Image.network(
-                  'https://upload.wikimedia.org/wikipedia/commons/e/e2/2015_0718_K%C3%A4sesp%C3%A4tzle_S%C3%B6lden.jpg',
+              child: Image(
+                  image: AssetImage('assets/images/cooking_bg1.jpg'),
                   fit: BoxFit.cover),
             ),
             Positioned.fill(
@@ -68,7 +68,10 @@ class RecipePage extends StatelessWidget {
                               recipeBook[recipe.title].stars = newRating;
                               writeRecipes(recipeBook);
                             }, recipe.stars),
-                            Icon(Icons.favorite_border_rounded, color: mint)
+                            Favorited((newFavorited) {
+                              recipeBook[recipe.title].favorited = newFavorited;
+                              writeRecipes(recipeBook);
+                            }, recipe.favorited)
                           ]),
                     )
                   ]),
