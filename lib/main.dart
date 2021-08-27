@@ -10,14 +10,47 @@ import 'Pages/RecipePage.dart';
 import 'Pages/RecipesListPage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'dart:math';
 
 var appConfig = new Map();
 var dropShadow;
 
+double tagSimilarityCutoff = 0.3;
+
 double borderRadius = 0;
+
+Set allTags = Set();
 
 void main() {
   runApp(MyApp());
+  // writeRecipes(<String, Recipe>{
+  //   "Kenesei Álom": Recipe(
+  //       "Kenesei Álom",
+  //       5,
+  //       true,
+  //       "Easy",
+  //       30,
+  //       "Dessert",
+  //       "Hungary",
+  //       ["Light", "Unmade"],
+  //       ["3 meggy", "Tejfől", "Háztartási keksz", "Vaniliás cukor", "Cukor"],
+  //       "A tejfölt összekeverjük a cukorral. A jénait kirakjuk a kekszekkel, rárakunk egy réteg krémet, majd kekszet, megint krémet. Tetejét kekszekkel fedjük. Letakarjuk, hűtőbe tesszük. Másnapra megpuhul a keksz, jól szeletelhető kockákra.\nGyümölcsöt beleszórva még finomabb!")
+  // });
+  readRecipes().then((value) {
+    recipeBook = {};
+    value.values.forEach((recipe2add) {
+      Recipe recipe = Recipe.fromJson(recipe2add);
+      recipeBook[recipe2add['title']] = recipe;
+      allTags.addAll(recipe.tags);
+    });
+  });
+}
+
+void updateAllTags() {
+  allTags.clear();
+  recipeBook.entries.forEach((element) {
+    allTags.addAll(element.value.tags);
+  });
 }
 
 const offwhite = Color(0xFFEFF3F5);
@@ -269,14 +302,7 @@ class MyApp extends StatelessWidget {
 }
 
 class AppContainer extends StatefulWidget {
-  AppContainer() {
-    readRecipes().then((value) {
-      recipeBook = {};
-      value.values.forEach((recipe2add) {
-        recipeBook[recipe2add['title']] = Recipe.fromJson(recipe2add);
-      });
-    });
-  }
+  AppContainer({Key key}) : super(key: key);
 
   @override
   _AppContainerState createState() => _AppContainerState();
@@ -543,4 +569,55 @@ bool containsIgnoreCase(String string1, String string2) {
 
 bool equalsIgnoreCase(String string1, String string2) {
   return string1.toLowerCase() == string2.toLowerCase();
+}
+
+int levenshtein(String a, String b) {
+  a = a.toUpperCase();
+  b = b.toUpperCase();
+  int sa = a.length;
+  int sb = b.length;
+  int i, j, cost, min1, min2, min3;
+  int levenshtein;
+  List<List<int>> d = new List.generate(sa + 1, (int i) => new List(sb + 1));
+  if (a.length == 0) {
+    levenshtein = b.length;
+    return (levenshtein);
+  }
+  if (b.length == 0) {
+    levenshtein = a.length;
+    return (levenshtein);
+  }
+  for (i = 0; i <= sa; i++) d[i][0] = i;
+  for (j = 0; j <= sb; j++) d[0][j] = j;
+  for (i = 1; i <= a.length; i++)
+    for (j = 1; j <= b.length; j++) {
+      if (a[i - 1] == b[j - 1])
+        cost = 0;
+      else
+        cost = 1;
+      min1 = (d[i - 1][j] + 1);
+      min2 = (d[i][j - 1] + 1);
+      min3 = (d[i - 1][j - 1] + cost);
+      d[i][j] = min(min1, min(min2, min3));
+    }
+  levenshtein = d[a.length][b.length];
+  return (levenshtein);
+}
+
+double similarity(String a, String b) {
+  double _similarity;
+  a = a.toUpperCase();
+  b = b.toUpperCase();
+  _similarity = 1 - levenshtein(a, b) / (max(a.length, b.length));
+  return (_similarity);
+}
+
+List<String> similarTags(String query, double cutoff) {
+  List<String> res = [];
+  allTags.forEach((tag) {
+    if (similarity(query, tag) >= cutoff) {
+      res.add(tag);
+    }
+  });
+  return res;
 }
