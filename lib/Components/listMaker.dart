@@ -42,6 +42,7 @@ class _ListElementState extends State<ListElement> {
             hideOnEmpty: true,
             direction: AxisDirection.up,
             textFieldConfiguration: TextFieldConfiguration(
+              textCapitalization: TextCapitalization.words,
               focusNode: widget.fn,
               onSubmitted: (newVal) {
                 addTag(newVal, context);

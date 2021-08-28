@@ -133,6 +133,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   padding: EdgeInsets.symmetric(
                       horizontal: appConfig['blockSize'] * 10),
                   child: TextField(
+                    textCapitalization: TextCapitalization.words,
                     decoration: InputDecoration(
                       focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: mint, width: 1.0),
@@ -334,6 +335,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   padding: EdgeInsets.symmetric(
                       horizontal: appConfig['blockSize'] * 10),
                   child: TextField(
+                    textCapitalization: TextCapitalization.words,
                     maxLines: 5,
                     keyboardType: TextInputType.multiline,
                     onSubmitted: (val) => print("submitted!"),
