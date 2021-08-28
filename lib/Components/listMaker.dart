@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'main.dart';
+import '../main.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 class ListElement extends StatefulWidget {

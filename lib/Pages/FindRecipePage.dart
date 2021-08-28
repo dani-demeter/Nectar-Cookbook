@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
-import '../backButton.dart';
-import '../parameterDropdown.dart';
-import '../listMaker.dart';
-import '../bigButton.dart';
+import '../Components/backButton.dart';
+import '../Components/parameterDropdown.dart';
+import '../Components/listMaker.dart';
+import '../Components/bigButton.dart';
 
 class FindRecipePage extends StatefulWidget {
   void Function(String, dynamic, VoidCallback) setPageCallback;

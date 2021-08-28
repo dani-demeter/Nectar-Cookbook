@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
-import '../backButton.dart';
-import '../parameterDropdown.dart';
-import '../listMaker.dart';
-import '../bigButton.dart';
+import '../Components/backButton.dart';
+import '../Components/parameterDropdown.dart';
+import '../Components/listMaker.dart';
+import '../Components/bigButton.dart';
+import 'package:uuid/uuid.dart';
+
+var uuid = Uuid();
 
 class AddRecipePage extends StatefulWidget {
   void Function(String, dynamic, VoidCallback) setPageCallback;
@@ -29,6 +32,13 @@ class AddRecipePage extends StatefulWidget {
   String typeOfDish = "Entree";
   String countryOfOrigin = "Unknown";
 
+  bool isEditing = false;
+  Recipe recipeBeingEdited;
+
+  void setBackCallback(VoidCallback bcb) {
+    this.backCallback = bcb;
+  }
+
   void clearValues() {
     focusLastTag = false;
     tagFocusNodes.clear();
@@ -46,6 +56,28 @@ class AddRecipePage extends StatefulWidget {
     difficulty = "Easy";
     typeOfDish = "Entree";
     countryOfOrigin = "Unknown";
+  }
+
+  void setValues(Recipe newRecipe) {
+    recipeBeingEdited = newRecipe;
+    focusLastTag = false;
+    tagFocusNodes.clear();
+
+    focusLastIngredient = false;
+    ingredientFocusNodes.clear();
+
+    tags = newRecipe.tags;
+    ingredients = newRecipe.ingredients;
+
+    titleTextController.text = newRecipe.title;
+    prepTextController.text = newRecipe.prep;
+    time2makeTextController.text = newRecipe.time2make.toString();
+
+    difficulty = newRecipe.difficulty;
+    typeOfDish = newRecipe.typeOfDish;
+    countryOfOrigin = newRecipe.countryOfOrigin;
+
+    isEditing = true;
   }
 
   @override
@@ -84,7 +116,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     () => widget.setPageCallback("home", null, null)),
                 Expanded(
                     child: Text(
-                  "New Recipe",
+                  widget.isEditing ? "Edit Recipe" : "New Recipe",
                   textAlign: TextAlign.center,
                   style: titleStyle,
                 )),
@@ -171,6 +203,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     Text("Type of Dish", style: parameterStyle),
                     new ParameterDropdown(widget.typeOfDish, <String>[
                       'Appetizer',
+                      'Soup',
                       'Entree',
                       'Dessert',
                       'Drink'
@@ -335,10 +368,14 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 BigButton(() {
                   Recipe recipe2Add = Recipe(
                       widget.titleTextController.text,
-                      0,
-                      false,
+                      widget.isEditing ? widget.recipeBeingEdited.stars : 0,
+                      widget.isEditing
+                          ? widget.recipeBeingEdited.favorited
+                          : false,
                       widget.difficulty,
-                      int.parse(widget.time2makeTextController.text),
+                      int.parse(widget.time2makeTextController.text.length == 0
+                          ? "0"
+                          : widget.time2makeTextController.text),
                       widget.typeOfDish,
                       widget.countryOfOrigin,
                       widget.tags.length != 0
@@ -348,13 +385,25 @@ class _AddRecipePageState extends State<AddRecipePage> {
                           ? widget.ingredients
                               .sublist(0, widget.ingredients.length - 1)
                           : [],
-                      widget.prepTextController.text);
-                  recipeBook[recipe2Add.title] = recipe2Add;
+                      widget.prepTextController.text,
+                      widget.isEditing
+                          ? widget.recipeBeingEdited.imagePath
+                          : "",
+                      widget.isEditing
+                          ? widget.recipeBeingEdited.id
+                          : uuid.v1());
+                  recipeBook[recipe2Add.id] = recipe2Add;
                   updateAllTags();
                   writeRecipes(recipeBook);
-                  widget.setPageCallback("recipe", recipe2Add,
-                      () => widget.setPageCallback("home", null, null));
-                }, "Add Recipe"),
+                  if (widget.isEditing) {
+                    widget.isEditing = false;
+                    widget.recipeBeingEdited = null;
+                    widget.backCallback();
+                  } else {
+                    widget.setPageCallback("recipe", recipe2Add.id,
+                        () => widget.setPageCallback("home", null, null));
+                  }
+                }, widget.isEditing ? "Save Recipe" : "Add Recipe"),
                 SizedBox(
                   height: appConfig['blockSizeVertical'] * 5,
                 )

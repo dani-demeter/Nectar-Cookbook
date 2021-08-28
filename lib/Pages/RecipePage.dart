@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 import '../Components/Tag.dart';
-import '../backButton.dart';
-import '../Components/Ratings.dart';
-import 'dart:io';
+import '../Components/RecipeBanner.dart';
 
 class RecipePage extends StatelessWidget {
   void Function(String, dynamic, VoidCallback) setPageCallback;
   VoidCallback backCallback;
+  String id;
   Recipe recipe;
 
   RecipePage(
     this.setPageCallback,
     this.backCallback,
-    this.recipe,
-  );
+    this.id,
+  ) {
+    this.recipe = recipeBook[id];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,61 +35,7 @@ class RecipePage extends StatelessWidget {
         child: Column(
           children: [
             //image etc
-            Stack(children: [
-              Container(
-                height: appConfig['blockSizeVertical'] * 25,
-                width: appConfig['blockSize'] * 100,
-                child: Image(
-                    image: AssetImage('assets/images/cooking_bg1.jpg'),
-                    fit: BoxFit.cover),
-              ),
-              Positioned.fill(
-                  child: Padding(
-                padding: EdgeInsets.symmetric(
-                    vertical: appConfig['blockSizeVertical']),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(children: [
-                        SizedBox(width: appConfig['blockSize'] * 2),
-                        IconBackButton(backCallback),
-                        Expanded(child: Container()),
-                        Container(
-                          width: appConfig['blockSize'] * 10,
-                          height: appConfig['blockSizeVertical'] * 7,
-                          child: IconButton(
-                            icon: Icon(Icons.add, color: mint),
-                            onPressed: () async {
-                              print("pressed");
-                            },
-                          ),
-                          decoration: BoxDecoration(
-                              color: inputColor,
-                              borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(borderRadius),
-                                  bottomLeft: Radius.circular(borderRadius))),
-                        ),
-                      ]),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: appConfig['blockSize'] * 2),
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Ratings((newRating) {
-                                recipeBook[recipe.title].stars = newRating;
-                                writeRecipes(recipeBook);
-                              }, recipe.stars),
-                              Favorited((newFavorited) {
-                                recipeBook[recipe.title].favorited =
-                                    newFavorited;
-                                writeRecipes(recipeBook);
-                              }, recipe.favorited)
-                            ]),
-                      )
-                    ]),
-              )),
-            ]),
+            RecipeBanner(backCallback, recipe),
             SizedBox(height: appConfig['blockSizeVertical'] * 2),
             //title
             Text(recipe.title, style: titleStyle.copyWith(color: inputColor)),
@@ -211,16 +158,38 @@ class RecipePage extends StatelessWidget {
                       style: parameterValueStyle.copyWith(
                           fontSize: 15, height: 1.75))),
             ),
+            SizedBox(height: appConfig['blockSizeVertical'] * 2),
             Padding(
               padding:
                   EdgeInsets.symmetric(horizontal: appConfig['blockSize'] * 10),
-              child: Align(
-                  alignment: Alignment.topRight,
-                  child: FlatButton.icon(
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton.icon(
+                      icon: Icon(Icons.delete, color: gray),
+                      onPressed: () {
+                        recipeBook.remove(recipe.id);
+                        writeRecipes(recipeBook);
+                        backCallback();
+                      },
+                      label: Text('Remove', style: parameterStyle),
+                    ),
+                    TextButton.icon(
                       icon: Icon(Icons.edit, color: gray),
-                      onPressed: () => print("edit"),
-                      label: Text('Edit', style: parameterStyle))),
+                      onPressed: () {
+                        setPageCallback(
+                            "addRecipe",
+                            {'clear': true, 'setValues': recipe},
+                            () => {
+                                  setPageCallback(
+                                      "recipe", recipe.id, backCallback)
+                                });
+                      },
+                      label: Text('Edit', style: parameterStyle),
+                    ),
+                  ]),
             ),
+            SizedBox(height: appConfig['blockSizeVertical'] * 2),
           ],
         ),
       ),

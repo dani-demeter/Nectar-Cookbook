@@ -11,6 +11,7 @@ import 'Pages/RecipesListPage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'dart:math';
+// import 'package:uuid/uuid.dart';
 
 var appConfig = new Map();
 var dropShadow;
@@ -33,14 +34,16 @@ void main() {
   //       "Dessert",
   //       "Hungary",
   //       ["Light", "Unmade"],
-  //       ["3 meggy", "Tejfől", "Háztartási keksz", "Vaniliás cukor", "Cukor"],
-  //       "A tejfölt összekeverjük a cukorral. A jénait kirakjuk a kekszekkel, rárakunk egy réteg krémet, majd kekszet, megint krémet. Tetejét kekszekkel fedjük. Letakarjuk, hűtőbe tesszük. Másnapra megpuhul a keksz, jól szeletelhető kockákra.\nGyümölcsöt beleszórva még finomabb!")
+  //       ["3 meggy", "Tejföl", "Háztartási keksz", "Vaniliás cukor", "Cukor"],
+  //       "A tejfölt összekeverjük a cukorral. A jénait kirakjuk a kekszekkel, rárakunk egy réteg krémet, majd kekszet, megint krémet. Tetejét kekszekkel fedjük. Letakarjuk, hűtőbe tesszük. Másnapra megpuhul a keksz, jól szeletelhető kockákra.\nGyümölcsöt beleszórva még finomabb!",
+  //       "",
+  //       Uuid().v1())
   // });
   readRecipes().then((value) {
     recipeBook = {};
     value.values.forEach((recipe2add) {
       Recipe recipe = Recipe.fromJson(recipe2add);
-      recipeBook[recipe2add['title']] = recipe;
+      recipeBook[recipe2add['id']] = recipe;
       allTags.addAll(recipe.tags);
     });
   });
@@ -283,7 +286,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Cookbook',
+        title: 'Nectar',
         theme: ThemeData(
           primarySwatch: Colors.blue,
           canvasColor: Colors.white,
@@ -320,22 +323,7 @@ class _AppContainerState extends State<AppContainer> {
       'recipe': RecipePage(
         setPage,
         () {},
-        new Recipe(
-            "Kasespatzle",
-            4,
-            true,
-            "Easy",
-            30,
-            "Entree",
-            "Austria",
-            <String>["Heavy", "Mate", "Konyi"],
-            <String>[
-              "20 tons of cheese",
-              "12 pieces of spatzle",
-              "one liter of ketchup",
-              "a really long ingredient that i don't think will fit in one line, but maybe will?"
-            ],
-            "Put the cheese all together. Cook the cheese. Bake the cheese. Eat the cheese. Repeat."),
+        "",
       ),
       'recipesList':
           RecipesListPage(setPage, () => setPage("home", null, null), {}, ''),
@@ -351,9 +339,14 @@ class _AppContainerState extends State<AppContainer> {
   void setPage(String newPage, var options, VoidCallback backCallback) {
     switch (newPage) {
       case "addRecipe":
-        if (options) {
+        if (options['clear']) {
           name2page['addRecipe'].clearValues();
         }
+        if (options['setValues'] != false) {
+          name2page['addRecipe'].setValues(options['setValues']);
+        }
+        name2page['addRecipe'].setBackCallback(backCallback);
+
         break;
       case "findRecipe":
         if (options) {
@@ -361,7 +354,6 @@ class _AppContainerState extends State<AppContainer> {
         }
         break;
       case "recipe":
-        assert(options is Recipe);
         assert(backCallback != null);
         name2page['recipe'] = RecipePage(setPage, backCallback, options);
         break;
@@ -410,6 +402,9 @@ class Recipe {
   List<String> tags;
   List<String> ingredients;
   String prep;
+  String imagePath;
+
+  String id;
   Recipe(
       this.title,
       this.stars,
@@ -420,7 +415,9 @@ class Recipe {
       this.countryOfOrigin,
       this.tags,
       this.ingredients,
-      this.prep);
+      this.prep,
+      this.imagePath,
+      this.id);
 
   Map<String, dynamic> toJson() => {
         'title': title,
@@ -433,23 +430,26 @@ class Recipe {
         'tags': tags,
         'ingredients': ingredients,
         'prep': prep,
+        'imagePath': imagePath,
+        'id': id
       };
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
     return Recipe(
-      json["title"],
-      json["stars"],
-      json["favorited"],
-      json["difficulty"],
-      json["time2make"],
-      json["typeOfDish"],
-      json["countryOfOrigin"],
-      [...json["tags"]].map((tag) => tag as String).toList(),
-      [...json["ingredients"]]
-          .map((ingredient) => ingredient as String)
-          .toList(),
-      json["prep"],
-    );
+        json["title"],
+        json["stars"],
+        json["favorited"],
+        json["difficulty"],
+        json["time2make"],
+        json["typeOfDish"],
+        json["countryOfOrigin"],
+        [...json["tags"]].map((tag) => tag as String).toList(),
+        [...json["ingredients"]]
+            .map((ingredient) => ingredient as String)
+            .toList(),
+        json["prep"],
+        json["imagePath"],
+        json["id"]);
   }
 }
 

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../main.dart';
 
 class Ratings extends StatefulWidget {
@@ -55,7 +54,7 @@ class _RatingsState extends State<Ratings> {
 class Favorited extends StatefulWidget {
   void Function(bool) setFavoriteCallback;
   bool isFavorite;
-  Favorited(this.setFavoriteCallback, this.isFavorite) {}
+  Favorited(this.setFavoriteCallback, this.isFavorite);
 
   @override
   State<Favorited> createState() => _FavoritedState();

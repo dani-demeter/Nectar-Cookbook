@@ -20,7 +20,9 @@ class HomePage extends StatelessWidget {
           //add a recipe
           InkWell(
             onTap: () => setPageCallback(
-                "addRecipe", true, () => setPageCallback("home", null, null)),
+                "addRecipe",
+                {'clear': true, 'setValues': false},
+                () => setPageCallback("home", null, null)),
             borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
             child: Stack(
               children: [
