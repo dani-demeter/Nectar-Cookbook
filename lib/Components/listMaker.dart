@@ -35,6 +35,10 @@ class _ListElementState extends State<ListElement> {
       children: [
         Flexible(
           child: TypeAheadField(
+            animationStart: 0.0,
+            animationDuration: Duration(milliseconds: 125),
+            keepSuggestionsOnLoading: false,
+            getImmediateSuggestions: false,
             hideOnEmpty: true,
             direction: AxisDirection.up,
             textFieldConfiguration: TextFieldConfiguration(
@@ -72,6 +76,8 @@ class _ListElementState extends State<ListElement> {
               style: parameterValueStyle,
             ),
             suggestionsCallback: widget.suggestionCallback,
+            debounceDuration: Duration(milliseconds: 100),
+            hideOnLoading: true,
             itemBuilder: (context, suggestion) {
               return ListTile(
                 leading: Icon(Icons.tag),
@@ -81,45 +87,11 @@ class _ListElementState extends State<ListElement> {
               );
             },
             onSuggestionSelected: (suggestion) {
+              widget.fn.requestFocus();
               widget.txt.text = suggestion;
               addTag(suggestion, context);
             },
           ),
-
-          // TextField(
-          // focusNode: widget.fn,
-          // onSubmitted: (newVal) {
-          //   addTag(newVal, context);
-          // },
-          // onEditingComplete: () {},
-          // onChanged: (newVal) {
-          //   setState(() {
-          //     widget.value = newVal;
-          //   });
-          // },
-          // controller: widget.txt,
-          // maxLines: 1,
-          // decoration: InputDecoration(
-          //   isDense: true,
-          //   hintText: "Add new",
-          //   hintStyle:
-          //       parameterValueStyle.copyWith(color: gray.withAlpha(100)),
-          //   contentPadding: EdgeInsets.symmetric(
-          //       horizontal: appConfig['blockSize'] * 3,
-          //       vertical: appConfig['blockSizeVertical'] * 2),
-          //   focusedBorder: OutlineInputBorder(
-          //     borderSide: BorderSide(color: mint, width: 1.0),
-          //     borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
-          //   ),
-          //   enabledBorder: OutlineInputBorder(
-          //     borderSide: BorderSide.none,
-          //     borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
-          //   ),
-          //   filled: true,
-          //   fillColor: fullwhite,
-          // ),
-          // style: parameterValueStyle,
-          // ),
         ),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: appConfig['blockSize'] * 2),
