@@ -1,4 +1,4 @@
-package com.example.cookbook
+package com.promethean.nectar
 
 import io.flutter.embedding.android.FlutterActivity
 
