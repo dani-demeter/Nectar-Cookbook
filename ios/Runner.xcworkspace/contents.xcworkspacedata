@@ -2,7 +2,7 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "Runner.xcworkspace">
+      location = "group:Runner.xcworkspace">
    </FileRef>
    <FileRef
       location = "group:Pods/Pods.xcodeproj">
