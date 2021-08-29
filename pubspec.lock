@@ -105,7 +105,7 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_keyboard_visibility:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: flutter_keyboard_visibility
       url: "https://pub.dartlang.org"
