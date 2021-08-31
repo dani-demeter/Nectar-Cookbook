@@ -27,9 +27,7 @@ jobs:
       - name: Build Android App
         run: flutter build apk --target-platform android-arm64
       - name: Build iOS App
-        run: |
-          xcode-project use-profiles
-          flutter build ipa --export-options-plist=/Users/builder/export_options.plist
+        run: flutter build ipa --export-options-plist=/Users/builder/export_options.plist
       - name: Release Apps
         uses: ncipollo/release-action@v1
         with:
