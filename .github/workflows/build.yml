@@ -34,4 +34,4 @@ jobs:
           tag: ${{ env.APP_VERSION }}
           name: ${{ env.APP_VERSION }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: 'build/app/outputs/apk/release/*.apk,build/ios/outputs/ipa/release/*.ipa
+          artifacts: 'build/app/outputs/apk/release/*.apk,build/ios/outputs/ipa/release/*.ipa'
